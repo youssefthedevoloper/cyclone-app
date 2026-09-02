@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 
 import '../theme.dart';
@@ -38,7 +39,14 @@ class Api {
     Map<String, dynamic>? body,
     bool auth = true,
   }) async {
-    final uri = Uri.parse('${AppConst.apiBase}$path');
+    Uri uri;
+    if (kIsWeb && AppConst.apiBase.isEmpty) {
+      // Same-origin deployment (Flutter web served by the backend itself):
+      // resolve against the current page URL instead of a hard-coded host.
+      uri = Uri.base.resolve(path);
+    } else {
+      uri = Uri.parse('${AppConst.apiBase}$path');
+    }
     final headers = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',

@@ -33,4 +33,4 @@ data/
 .DS_Store
 Thumbs.db
 .idea/
-.vscode/
+.vscode/backend/web/

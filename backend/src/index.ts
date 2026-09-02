@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import fs from 'fs';
 import { config } from './config';
 import { migrate } from './db/schema';
 import { logger } from './utils/logger';
@@ -39,6 +41,13 @@ export function createApp() {
   );
 
   app.use('/health', healthRoutes);
+
+  // Serve the Flutter web build from ../web (same-origin deployment) if present.
+  const webRoot = process.env.WEB_ROOT || path.resolve(__dirname, '..', 'web');
+  if (fs.existsSync(webRoot)) {
+    app.use(express.static(webRoot));
+    logger.info(`Serving web app from ${webRoot}`);
+  }
 
   app.use('/api/auth', authRoutes);
   app.use('/api/users', userRoutes);
