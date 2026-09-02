@@ -29,19 +29,20 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Future<void> _loadServer() async {
+    if (AppConst.apiBase.isNotEmpty) return; // URL is baked in, nothing to restore
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString('server_url');
     if (saved != null && saved.isNotEmpty) {
       _server.text = saved;
       Api.setBaseUrl(saved);
-    } else if (!kIsWeb && Api.baseUrl.isNotEmpty) {
+    } else if (Api.baseUrl.isNotEmpty) {
       _server.text = Api.baseUrl;
     }
     if (mounted) setState(() {});
   }
 
   Future<void> _saveServer() async {
-    if (kIsWeb) return;
+    if (kIsWeb || AppConst.apiBase.isNotEmpty) return;
     var s = _server.text.trim();
     if (s.isNotEmpty && !s.startsWith('http://') && !s.startsWith('https://')) {
       s = 'https://$s';
@@ -67,7 +68,7 @@ class _AuthScreenState extends State<AuthScreen> {
       _err('Enter a valid email and a password of at least 6 characters.');
       return;
     }
-    if (!kIsWeb && _server.text.trim().isEmpty) {
+    if (!kIsWeb && AppConst.apiBase.isEmpty && _server.text.trim().isEmpty) {
       _err('Enter the server address (the https://…trycloudflare.com link).');
       return;
     }
@@ -115,7 +116,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 const SizedBox(height: 4),
                 Text(_register ? 'Join CYCLONE to start earning points.' : 'Log in to continue.', style: const TextStyle(color: C.text2, fontSize: 13)),
                 const SizedBox(height: 18),
-                if (!kIsWeb) ...[
+                if (!kIsWeb && AppConst.apiBase.isEmpty) ...[
                   const FieldLabel('Server address'),
                   TextField(
                     controller: _server,
