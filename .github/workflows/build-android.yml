@@ -1,0 +1,76 @@
+name: Build Android APK
+
+# Run it manually (Actions tab > "Run workflow") or on every push to mobile/.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/build-android.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # If you already have an upload keystore, paste it (base64) into the secret
+      # ANDROID_KEYSTORE_B64. Otherwise a fresh keystore is generated and the
+      # "upload-keystore-KEEP-SAFE" artifact below is how you keep it for updates.
+      - name: Create or restore upload keystore
+        shell: bash
+        run: |
+          set -euxo pipefail
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_B64 }}" ]; then
+            echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 -d > mobile/android/upload-keystore.jks
+          else
+            keytool -genkeypair -v -keystore mobile/android/upload-keystore.jks \
+              -storepass cyclone1234 -keypass cyclone1234 -alias cyclone \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=CYCLONE, OU=Mobile, O=CYCLONE, L=Cairo, C=EG"
+          fi
+          ls -la mobile/android/upload-keystore.jks
+
+      - name: Build release APK and App Bundle
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL || 'https://cyclone-backend.onrender.com' }}
+          KEY_ALIAS: cyclone
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'cyclone1234' }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'cyclone1234' }}
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cd mobile
+          flutter pub get
+          flutter build apk --release --dart-define=API_BASE="$API_BASE_URL"
+          flutter build appbundle --release --dart-define=API_BASE="$API_BASE_URL"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyclone-apk
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload AAB (for Google Play)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyclone-aab-google-play
+          path: mobile/build/app/outputs/bundle/release/app-release.aab
+
+      - name: Upload signing keystore (KEEP SAFE, needed for future updates)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: upload-keystore-KEEP-SAFE
+          path: mobile/android/upload-keystore.jks
