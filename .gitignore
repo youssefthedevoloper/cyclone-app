@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Builds & generated
+dist/
+backend/dist/
+frontend/dist/
+build/
+mobile/build/
+
+# Dart / Flutter cache (mobile has its own .gitignore too)
+mobile/.dart_tool/
+.pub-cache/
+
+# Runtime data (SQLite database lives here)
+data/
+
+# Database files anywhere
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Logs, OS junk, editors
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
