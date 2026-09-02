@@ -21,6 +21,21 @@ class Api {
   static String? _token;
   static void setToken(String? t) => _token = t;
 
+  static String? _customBase;
+  static String get baseUrl {
+    if (_customBase != null && _customBase!.isNotEmpty) return _customBase!;
+    return AppConst.apiBase;
+  }
+
+  /// Allows the user to point the app at any backend address (tunnel URL).
+  static void setBaseUrl(String? url) {
+    var u = (url ?? '').trim();
+    while (u.endsWith('/')) {
+      u = u.substring(0, u.length - 1);
+    }
+    _customBase = u;
+  }
+
   static Future<Map<String, dynamic>> get(String path, {bool auth = true}) =>
       _send('GET', path, auth: auth);
 
@@ -40,12 +55,14 @@ class Api {
     bool auth = true,
   }) async {
     Uri uri;
-    if (kIsWeb && AppConst.apiBase.isEmpty) {
+    if (kIsWeb && baseUrl.isEmpty) {
       // Same-origin deployment (Flutter web served by the backend itself):
       // resolve against the current page URL instead of a hard-coded host.
       uri = Uri.base.resolve(path);
+    } else if (baseUrl.isEmpty) {
+      throw ApiException('Server address is not set. Enter it on the login screen.');
     } else {
-      uri = Uri.parse('${AppConst.apiBase}$path');
+      uri = Uri.parse('$baseUrl$path');
     }
     final headers = <String, String>{
       'Content-Type': 'application/json',

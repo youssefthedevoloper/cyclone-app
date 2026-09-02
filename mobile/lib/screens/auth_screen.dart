@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/api.dart';
 import '../state/auth.dart';
@@ -18,12 +20,43 @@ class _AuthScreenState extends State<AuthScreen> {
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _server = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadServer();
+  }
+
+  Future<void> _loadServer() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString('server_url');
+    if (saved != null && saved.isNotEmpty) {
+      _server.text = saved;
+      Api.setBaseUrl(saved);
+    } else if (!kIsWeb && Api.baseUrl.isNotEmpty) {
+      _server.text = Api.baseUrl;
+    }
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _saveServer() async {
+    if (kIsWeb) return;
+    var s = _server.text.trim();
+    if (s.isNotEmpty && !s.startsWith('http://') && !s.startsWith('https://')) {
+      s = 'https://$s';
+    }
+    Api.setBaseUrl(s);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('server_url', s);
+  }
 
   @override
   void dispose() {
     _name.dispose();
     _email.dispose();
     _password.dispose();
+    _server.dispose();
     super.dispose();
   }
 
@@ -34,8 +67,13 @@ class _AuthScreenState extends State<AuthScreen> {
       _err('Enter a valid email and a password of at least 6 characters.');
       return;
     }
+    if (!kIsWeb && _server.text.trim().isEmpty) {
+      _err('Enter the server address (the https://…trycloudflare.com link).');
+      return;
+    }
     setState(() => _busy = true);
     final auth = context.read<AuthController>();
+    await _saveServer();
     try {
       if (_register) {
         await auth.register(_name.text.trim().isEmpty ? email.split('@').first : _name.text.trim(), email, pass);
@@ -77,6 +115,16 @@ class _AuthScreenState extends State<AuthScreen> {
                 const SizedBox(height: 4),
                 Text(_register ? 'Join CYCLONE to start earning points.' : 'Log in to continue.', style: const TextStyle(color: C.text2, fontSize: 13)),
                 const SizedBox(height: 18),
+                if (!kIsWeb) ...[
+                  const FieldLabel('Server address'),
+                  TextField(
+                    controller: _server,
+                    keyboardType: TextInputType.url,
+                    autocorrect: false,
+                    decoration: fieldDecoration(hint: 'https://….trycloudflare.com'),
+                  ),
+                  const SizedBox(height: 14),
+                ],
                 if (_register) ...[
                   const FieldLabel('Full name'),
                   TextField(controller: _name, decoration: fieldDecoration(hint: 'e.g. Sarah Traveler')),

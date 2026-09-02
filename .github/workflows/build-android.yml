@@ -44,7 +44,7 @@ jobs:
 
       - name: Build release APK and App Bundle
         env:
-          API_BASE_URL: ${{ secrets.API_BASE_URL || 'https://cyclone-backend.onrender.com' }}
+          API_BASE_URL: ${{ secrets.API_BASE_URL || '' }}
           KEY_ALIAS: cyclone
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'cyclone1234' }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'cyclone1234' }}

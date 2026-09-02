@@ -97,7 +97,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Text('CYCLONE is a Flutter companion for the CYCLONE airport experience — journeys, Airport Map, QR item safety and loyalty rewards.', style: TextStyle(color: C.text2, fontSize: 13, height: 1.45)),
                 const SizedBox(height: 12),
                 InfoTile(label: 'Version', value: '1.0.0 (web)'),
-                InfoTile(label: 'Backend', value: AppConst.apiBase),
+                InfoTile(label: 'Backend', value: Api.baseUrl.isEmpty ? 'not set' : Api.baseUrl),
               ]),
             ),
           ],

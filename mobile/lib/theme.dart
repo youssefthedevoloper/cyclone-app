@@ -64,8 +64,10 @@ ThemeData buildTheme() {
 }
 
 class AppConst {
+  // Empty on purpose: the mobile app asks for the backend address once at
+  // login (saved in SharedPreferences), and the web build resolves same-origin.
   static const String apiBase = String.fromEnvironment(
     'API_BASE',
-    defaultValue: 'http://localhost:4000',
+    defaultValue: '',
   );
 }
