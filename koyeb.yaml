@@ -1,0 +1,44 @@
+# Koyeb deployment config (free tier, no credit card).
+# Connect this GitHub repo in the Koyeb dashboard and this file is picked up
+# automatically.
+deploymentname: cyclone
+
+services:
+  - name: backend
+    type: web
+    git:
+      repository: https://github.com/youssefthedevoloper/cyclone-app
+      branch: main
+      workdir: backend
+      buildpack:
+        build_command: npm ci --no-audit && npm run build
+        run_command: node start.js
+    instance_types:
+      - type: free
+    regions:
+      - fra
+    ports:
+      - port: 4000
+        protocol: http
+    routes:
+      - path: /
+        port: 4000
+    health_checks:
+      - grace_period: 10
+        interval: 60
+        restart_limit: 3
+        path: /health
+        port: 4000
+        protocol: http
+        timeout: 5
+    env:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4000"
+      # Free instances have no persistent disk: SQLite lives in /tmp and is
+      # re-seeded automatically on every boot (demo data only).
+      - key: DATABASE_PATH
+        value: /tmp/cyclone.db
+      # Optional but recommended after deploy: add JWT_SECRET in the Koyeb
+      # dashboard Environment tab to override the built-in demo secret.
