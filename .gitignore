@@ -33,4 +33,7 @@ data/
 .DS_Store
 Thumbs.db
 .idea/
-.vscode/backend/web/
+.vscode/
+
+# Local web build (copied from mobile/build/web for same-origin serving)
+backend/web/
