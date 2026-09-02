@@ -1,0 +1,34 @@
+# Render blueprint for the CYCLONE backend.
+# After deploy, set the block quoting. Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: cyclone-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm ci --no-audit || npm install; npm run build
+    startCommand: node start.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: RATE_LIMIT_MAX
+        value: 200
+      - key: FIRST20_COUNT
+        value: 20
+      # Persist SQLite to the attached disk (seeded automatically on first boot).
+      - key: DATABASE_PATH
+        value: /data/cyclone.db
+      # Fill these once from the Render dashboard (Service > Environment):
+      # JWT_SECRET = any long random string
+      # CORS_ORIGIN = https://youssefthedevoloper.github.io  (no path, no trailing slash)
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+    disk:
+      name: cyclone-data
+      mountPath: /data
+      sizeGB: 1

@@ -1,0 +1,43 @@
+name: Deploy Flutter web to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/deploy.yml'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # API_BASE_URL is your backend URL, set in Settings > Secrets and variables > Actions.
+      # Until set, it falls back to the Render service name from render.yaml.
+      - name: Build web
+        run: |
+          cd mobile
+          flutter pub get
+          flutter build web --release --base-href=/cyclone-app/ \
+            --dart-define=API_BASE='${{ secrets.API_BASE_URL || 'https://cyclone-backend.onrender.com' }}'
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: mobile/build/web
+
+      - uses: actions/deploy-pages@v4
