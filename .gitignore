@@ -39,3 +39,8 @@ Thumbs.db
 backend/web/
 
 .runtime/
+
+# Built APKs / downloads
+apk-output/
+*.apk
+cyclone-apk.zip
