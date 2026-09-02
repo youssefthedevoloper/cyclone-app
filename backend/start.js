@@ -22,5 +22,11 @@ if (!fs.existsSync(dbPath)) {
 }
 
 function startServer() {
-  require('./dist/index.js');
+  const app = require('./dist/index.js');
+  if (app && typeof app.startServer === 'function') {
+    app.startServer();
+  } else {
+    console.error('[start.js] dist/index.js did not export startServer — run `npm run build` first.');
+    process.exit(1);
+  }
 }
