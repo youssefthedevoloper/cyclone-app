@@ -4,10 +4,10 @@ import 'package:provider/provider.dart';
 import '../state/auth.dart';
 import '../state/data.dart';
 import '../theme.dart';
-import 'features.dart';
+import 'airport.dart';
+import 'explore.dart';
 import 'home.dart';
 import 'journey.dart';
-import 'loyalty.dart';
 import 'profile.dart';
 
 const double _maxW = 560;
@@ -36,8 +36,8 @@ class _AppShellState extends State<AppShell> {
     final pages = [
       HomeTab(auth: auth, data: data),
       JourneyTab(auth: auth, data: data),
-      FeaturesTab(auth: auth, data: data),
-      LoyaltyTab(auth: auth, data: data),
+      AirportTab(auth: auth, data: data),
+      ExploreTab(auth: auth, data: data),
       ProfileTab(auth: auth, data: data),
     ];
     return Scaffold(
@@ -46,16 +46,13 @@ class _AppShellState extends State<AppShell> {
         constraints: const BoxConstraints(maxWidth: _maxW),
         child: NavigationBar(
           selectedIndex: _index,
-          backgroundColor: C.surface,
-          indicatorColor: const Color(0xFFDCEAFF),
-          height: 64,
           onDestinationSelected: (i) => setState(() => _index = i),
           destinations: const [
-            NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-            NavigationDestination(icon: Icon(Icons.route_outlined), selectedIcon: Icon(Icons.route), label: 'Journey'),
-            NavigationDestination(icon: Icon(Icons.grid_view_outlined), selectedIcon: Icon(Icons.grid_view), label: 'Features'),
-            NavigationDestination(icon: Icon(Icons.stars_outlined), selectedIcon: Icon(Icons.stars), label: 'Loyalty'),
-            NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
+            NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home_rounded), label: 'Home'),
+            NavigationDestination(icon: Icon(Icons.route_outlined), selectedIcon: Icon(Icons.route_rounded), label: 'Journey'),
+            NavigationDestination(icon: Icon(Icons.map_outlined), selectedIcon: Icon(Icons.map_rounded), label: 'Airport'),
+            NavigationDestination(icon: Icon(Icons.explore_outlined), selectedIcon: Icon(Icons.explore_rounded), label: 'Explore'),
+            NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person_rounded), label: 'Profile'),
           ],
         ),
       ),
