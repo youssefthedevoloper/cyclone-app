@@ -97,25 +97,26 @@ class ProfileTab extends StatelessWidget {
 
   Widget _identityCard(BuildContext context, String name, String email, String acc, String firstName) {
     return CyCard(
-      padding: const EdgeInsets.all(20),
-      color: C.primarySoft,
-      border: Border.all(color: C.primaryLine),
-      child: Row(children: [
-        ProfileAvatar(name: name, size: 60, onTap: () => push(context, const SettingsScreen())),
+      padding: const EdgeInsets.all(24),
+      color: C.primary,
+      border: Border.all(color: C.primary),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        ProfileAvatar(name: name, size: 64, onTap: () => push(context, const SettingsScreen())),
         const SizedBox(width: 16),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: C.primaryDark)),
+            const SizedBox(height: 4),
+            Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.3)),
             const SizedBox(height: 2),
-            Text(email, style: const TextStyle(color: C.primaryDark, fontSize: 12.5)),
-            const SizedBox(height: 10),
+            Text(email, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+            const SizedBox(height: 14),
             Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-              _planChip(auth.isPremium),
+              _planChip(auth.isPremium, onBlue: true),
               if (acc.isNotEmpty)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(color: C.surface, borderRadius: BorderRadius.circular(C.radiusPill), border: Border.all(color: C.primaryLine)),
-                  child: Text('#$acc', style: const TextStyle(color: C.text2, fontSize: 11.5, fontWeight: FontWeight.w700)),
+                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(C.radiusPill)),
+                  child: Text('#$acc', style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w700)),
                 ),
             ]),
           ]),
@@ -124,9 +125,9 @@ class ProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _planChip(bool premium) {
-    final bg = premium ? C.primary : C.neutralSoft;
-    final fg = premium ? Colors.white : C.text2;
+  Widget _planChip(bool premium, {bool onBlue = false}) {
+    final bg = premium ? Colors.white : (onBlue ? Colors.white24 : C.neutralSoft);
+    final fg = premium ? C.primary : (onBlue ? Colors.white : C.text2);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(C.radiusPill)),

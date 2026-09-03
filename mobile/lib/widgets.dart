@@ -395,6 +395,8 @@ const _month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 /* -------------------------------------------------------------------------- */
 
 /// Large blue hero card used for the primary flight on the Home screen.
+/// Mirror the reference: flight number + status pill on top, big airport
+/// codes with city + time, then Gate / Seat pills at the bottom.
 class FlightHeroCard extends StatelessWidget {
   final Map<String, dynamic> flight;
   final VoidCallback onTap;
@@ -405,20 +407,15 @@ class FlightHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = _fmt(flight['status']).isEmpty ? 'Scheduled' : _fmt(flight['status']);
-    final airline = _fmt(flight['airline']).isEmpty ? 'CYCLONE' : _fmt(flight['airline']);
     final num = _fmt(flight['flightNumber']).isEmpty ? 'Flight' : _fmt(flight['flightNumber']);
+    final origin = _fmt(flight['origin']).isEmpty ? '—' : _fmt(flight['origin']);
+    final dest = _fmt(flight['destination']).isEmpty ? '—' : _fmt(flight['destination']);
 
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF0E5ADB), Color(0xFF0B3CA0)],
-        ),
+        color: C.primary,
         borderRadius: BorderRadius.circular(C.radius),
-        boxShadow: [
-          BoxShadow(color: C.primary.withValues(alpha: 0.35), blurRadius: 26, offset: const Offset(0, 12)),
-        ],
+        boxShadow: [BoxShadow(color: C.primary, blurRadius: 22, offset: const Offset(0, 10))],
       ),
       child: Material(
         color: Colors.transparent,
@@ -432,50 +429,38 @@ class FlightHeroCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(children: [
-                  Container(
-                    width: 38, height: 38,
-                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(12)),
-                    child: const Icon(Icons.flight, color: Colors.white, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('$airline  $num', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16, letterSpacing: -0.2)),
-                      Text('Boarding pass', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
-                    ]),
-                  ),
-                  _glassBadge(status),
+                  const Icon(Icons.flight, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text(num, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16, letterSpacing: 0.4)),
+                  const Spacer(),
+                  _statusPill(status),
                 ]),
-                const SizedBox(height: 20),
+                const SizedBox(height: 22),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _airportCol(_fmt(flight['origin']), _fmt(flight['departureTime']), start: true),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(C.radiusPill)),
-                      child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                        Icon(Icons.flight_takeoff, color: Colors.white, size: 20),
-                        SizedBox(width: 4),
-                        Icon(Icons.arrow_forward, color: Colors.white, size: 16),
-                      ]),
+                    _city(origin, flight['departureTime']?.toString(), left: true),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(C.radiusPill)),
+                        child: const Icon(Icons.flight_takeoff, color: Colors.white, size: 22),
+                      ),
                     ),
-                    _airportCol(_fmt(flight['destination']), _fmt(flight['arrivalTime'])),
+                    _city(dest, flight['arrivalTime']?.toString()),
                   ],
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 22),
                 Container(height: 1, color: Colors.white.withValues(alpha: 0.18)),
                 const SizedBox(height: 14),
                 Row(children: [
-                  _miniStat(Icons.signpost_outlined, 'Gate', _fmt(flight['gate']).isEmpty ? '—' : _fmt(flight['gate'])),
-                  const SizedBox(width: 16),
-                  _miniStat(Icons.event_seat_outlined, 'Seat', _fmt(flight['seat']).isEmpty ? '—' : _fmt(flight['seat'])),
+                  _pill(Icons.signpost_outlined, 'Gate', _fmt(flight['gate']).isEmpty ? '—' : _fmt(flight['gate'])),
+                  const SizedBox(width: 10),
+                  _pill(Icons.event_seat_outlined, 'Seat', _fmt(flight['seat']).isEmpty ? '—' : _fmt(flight['seat'])),
                   const Spacer(),
                   Container(
-                    width: 34, height: 34,
+                    width: 32, height: 32,
                     decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), shape: BoxShape.circle),
-                    child: const Icon(Icons.chevron_right, color: Colors.white, size: 22),
+                    child: const Icon(Icons.chevron_right, color: Colors.white, size: 20),
                   ),
                 ]),
               ],
@@ -486,42 +471,79 @@ class FlightHeroCard extends StatelessWidget {
     );
   }
 
-  Widget _glassBadge(String status) {
-    final bg = status.toLowerCase() == 'boarding' ? const Color(0xFF4CD964) : Colors.white.withValues(alpha: 0.2);
+  Widget _statusPill(String status) {
+    final boarding = status.toLowerCase() == 'boarding';
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(C.radiusPill)),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: boarding ? const Color(0xFF37C264) : Colors.white.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(C.radiusPill),
+      ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
-        if (status.toLowerCase() == 'boarding') ...[
+        if (boarding) ...[
           Container(width: 7, height: 7, decoration: const BoxDecoration(color: Color(0xFF0B5A2A), shape: BoxShape.circle)),
           const SizedBox(width: 6),
         ],
-        Text(status.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: 0.6)),
+        Text(status.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
       ]),
     );
   }
 
-  Widget _airportCol(String code, String time, {bool start = false}) {
-    return Column(
-      crossAxisAlignment: start ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-      children: [
-        Text(time.isEmpty ? '' : fmtTime(time), style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12.5, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 2),
-        Text(code.isEmpty ? '—' : code, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-      ],
+  Widget _city(String code, String? time, {bool left = false}) {
+    final city = airportCity(code);
+    return SizedBox(
+      width: 100,
+      child: Column(
+        crossAxisAlignment: left ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+        children: [
+          Text(
+            time == null || time.isEmpty ? '' : fmtTime(time),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 15, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 2),
+          Text(code, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w700, letterSpacing: -0.5)),
+          Text(city, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12), overflow: TextOverflow.ellipsis),
+        ],
+      ),
     );
   }
 
-  Widget _miniStat(IconData icon, String label, String value) {
-    return Row(mainAxisSize: MainAxisSize.min, children: [
-      Icon(icon, color: Colors.white70, size: 16),
-      const SizedBox(width: 5),
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontSize: 10, fontWeight: FontWeight.w600)),
-        Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13)),
+  Widget _pill(IconData icon, String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(14)),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, color: Colors.white, size: 16),
+        const SizedBox(width: 6),
+        Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
       ]),
-    ]);
+    );
   }
+}
+
+/// Small curated code -> city map used only for display enrichment of the
+/// existing airport codes. Falls back to the code itself if unknown.
+String airportCity(String code) {
+  const map = <String, String>{
+    'CAI': 'Cairo',
+    'DXB': 'Dubai',
+    'JFK': 'New York',
+    'LHR': 'London',
+    'DOH': 'Doha',
+    'RUH': 'Riyadh',
+    'JED': 'Jeddah',
+    'CDG': 'Paris',
+    'FRA': 'Frankfurt',
+    'AMS': 'Amsterdam',
+    'IST': 'Istanbul',
+    'ATH': 'Athens',
+    'MAD': 'Madrid',
+    'BCN': 'Barcelona',
+    'FCO': 'Rome',
+    'LGW': 'London',
+    'AUH': 'Abu Dhabi',
+  };
+  return map[code] ?? code;
 }
 
 /// White card wrapped version of the flight (used without a hero).
@@ -899,6 +921,113 @@ class JourneyStep extends StatelessWidget {
           ?trailing,
         ]),
       ),
+    );
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Flight Status & Journey progress components (reference-aligned)          */
+/* -------------------------------------------------------------------------- */
+
+/// White card containing a list of flight status rows.
+class FlightStatusCard extends StatelessWidget {
+  final List<Map<String, dynamic>> flights;
+  final VoidCallback? onRowTap;
+  const FlightStatusCard({super.key, required this.flights, this.onRowTap});
+
+  @override
+  Widget build(BuildContext context) {
+    if (flights.isEmpty) {
+      return CyCard(
+        child: Row(children: [
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(color: C.primarySoft, borderRadius: BorderRadius.circular(13)),
+            child: const Icon(Icons.flight_takeoff, color: C.primary, size: 22),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(child: Text('Flight status will appear here.', style: TextStyle(color: C.text2, fontSize: 13.5))),
+        ]),
+      );
+    }
+    return ServiceListCard(children: [
+      for (final f in flights) FlightStatusRow(flight: f, onTap: () => onRowTap?.call()),
+    ]);
+  }
+}
+
+/// A single flight status row: icon, flight number, status, time.
+class FlightStatusRow extends StatelessWidget {
+  final Map<String, dynamic> flight;
+  final VoidCallback? onTap;
+  const FlightStatusRow({super.key, required this.flight, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final num = (flight['flightNumber'] ?? flight['id'] ?? 'Flight').toString();
+    final status = (flight['status'] ?? 'Scheduled').toString();
+    final time = (flight['departureTime'] as String?) ?? '';
+    return InkWell(
+      borderRadius: BorderRadius.circular(C.radiusCard),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(children: [
+          Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(color: C.primarySoft, borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.flight, color: C.primary, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(num, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: C.text)),
+              Text([flight['origin'], flight['destination']].whereType<String>().join(' ? '), style: const TextStyle(color: C.text3, fontSize: 12)),
+            ]),
+          ),
+          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            StatusBadge(status),
+            const SizedBox(height: 3),
+            Text(time.isEmpty ? '' : fmtTime(time), style: const TextStyle(color: C.text2, fontSize: 12.5, fontWeight: FontWeight.w600)),
+          ]),
+        ]),
+      ),
+    );
+  }
+}
+
+/// Horizontal step progress indicator: ? ??? ? ??? ?
+class JourneyProgressDots extends StatelessWidget {
+  final int total;
+  final int current; // zero-based index of the current step
+  final double width;
+  const JourneyProgressDots({super.key, required this.total, required this.current, this.width = 18});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < total; i++) ...[
+          Container(
+            width: 11, height: 11,
+            margin: const EdgeInsets.symmetric(horizontal: 1.5),
+            decoration: BoxDecoration(
+              color: i < current ? C.primary : (i == current ? C.primary : C.neutral),
+              shape: BoxShape.circle,
+            ),
+          ),
+          if (i < total - 1)
+            Container(
+              width: 16, height: 3,
+              margin: const EdgeInsets.symmetric(horizontal: 1),
+              decoration: BoxDecoration(
+                color: i < current ? C.primarySoft : C.neutralSoft,
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+        ],
+      ],
     );
   }
 }

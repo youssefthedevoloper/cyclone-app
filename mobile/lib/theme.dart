@@ -2,28 +2,27 @@ import 'package:flutter/material.dart';
 
 /// CYCLONE design system.
 ///
-/// Clean, premium, travel-focused, iOS-inspired. White / very light
-/// backgrounds, Cyclone blue primary, large rounded cards, spacious layout,
-/// minimal borders, subtle shadows.
+/// White canvas + Cyclone blue accents, premium / minimal / travel-focused /
+/// Apple-inspired. Large rounded cards, subtle shadows, generous whitespace.
 class C {
   // Brand
-  static const Color primary = Color(0xFF0B5ADB);
-  static const Color primaryDark = Color(0xFF0B2545);
-  static const Color primarySoft = Color(0xFFEAF2FF);
-  static const Color primaryLine = Color(0xFFCFE0FB);
+  static const Color primary = Color(0xFF1E4DB7);
+  static const Color primaryDark = Color(0xFF173A8A);
+  static const Color primarySoft = Color(0xFFE6F0FF);
+  static const Color primaryLine = Color(0xFFCCDDF5);
 
   // Surfaces
-  static const Color bg = Color(0xFFF4F7FB);
+  static const Color bg = Color(0xFFF8FAFD);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceAlt = Color(0xFFF7F9FC);
+  static const Color surfaceAlt = Color(0xFFF4F7FB);
 
   // Text
-  static const Color text = Color(0xFF0B1B33);
-  static const Color text2 = Color(0xFF52678A);
-  static const Color text3 = Color(0xFF8A97AD);
+  static const Color text = Color(0xFF080808);
+  static const Color text2 = Color(0xFF6B7280);
+  static const Color text3 = Color(0xFF9AA3B2);
 
   // Lines / shadows
-  static const Color border = Color(0xFFE6EBF3);
+  static const Color border = Color(0xFFE9EDF3);
 
   // Status
   static const Color success = Color(0xFF0F9D58);
@@ -36,24 +35,24 @@ class C {
   static const Color neutral = Color(0xFFB9C4D6);
 
   // Layout
-  static const double radius = 22;
-  static const double radiusCard = 22;
-  static const double radiusSmall = 14;
+  static const double radius = 26; // large cards
+  static const double radiusCard = 24; // medium/large cards
+  static const double radiusSmall = 16; // buttons / icon containers
   static const double radiusPill = 999;
 
   // Spacing scale
   static const double pad = 20;
 
   static BoxShadow cardShadow = BoxShadow(
-    color: const Color(0x0B0B2545),
-    blurRadius: 22,
-    offset: const Offset(0, 8),
+    color: const Color(0x0A173A8A),
+    blurRadius: 16,
+    offset: const Offset(0, 4),
   );
 
   static BoxShadow softShadow = BoxShadow(
-    color: const Color(0x080B2545),
-    blurRadius: 12,
-    offset: const Offset(0, 4),
+    color: const Color(0x0A173A8A),
+    blurRadius: 10,
+    offset: const Offset(0, 3),
   );
 }
 
@@ -75,21 +74,21 @@ ThemeData buildTheme() {
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
-      titleSpacing: 20,
+      titleSpacing: 24,
       surfaceTintColor: Colors.transparent,
       titleTextStyle: TextStyle(
         color: C.text,
-        fontSize: 20,
-        fontWeight: FontWeight.w800,
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
         letterSpacing: -0.3,
       ),
     ),
     textTheme: base.textTheme.copyWith(
-      displaySmall: const TextStyle(color: C.text, fontWeight: FontWeight.w900, fontSize: 30, letterSpacing: -0.5),
-      headlineMedium: const TextStyle(color: C.text, fontWeight: FontWeight.w800, fontSize: 24, letterSpacing: -0.4),
-      titleLarge: const TextStyle(color: C.text, fontWeight: FontWeight.w800, fontSize: 20, letterSpacing: -0.3),
-      titleMedium: const TextStyle(color: C.text, fontWeight: FontWeight.w700, fontSize: 16),
-      bodyMedium: const TextStyle(color: C.text, fontSize: 14.5, height: 1.35),
+      displaySmall: const TextStyle(color: C.text, fontWeight: FontWeight.w700, fontSize: 30, letterSpacing: -0.4),
+      headlineMedium: const TextStyle(color: C.text, fontWeight: FontWeight.w700, fontSize: 24, letterSpacing: -0.3),
+      titleLarge: const TextStyle(color: C.text, fontWeight: FontWeight.w700, fontSize: 20, letterSpacing: -0.3),
+      titleMedium: const TextStyle(color: C.text, fontWeight: FontWeight.w600, fontSize: 17),
+      bodyMedium: const TextStyle(color: C.text, fontSize: 15, height: 1.4),
       bodySmall: const TextStyle(color: C.text2, fontSize: 13),
       labelLarge: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15),
     ),
@@ -108,12 +107,14 @@ ThemeData buildTheme() {
       backgroundColor: C.surface,
       indicatorColor: C.primarySoft,
       surfaceTintColor: Colors.transparent,
-      height: 68,
+      elevation: 0,
+      height: 66,
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         final sel = states.contains(WidgetState.selected);
         return TextStyle(
           fontSize: 11,
-          fontWeight: sel ? FontWeight.w700 : FontWeight.w600,
+          fontWeight: sel ? FontWeight.w600 : FontWeight.w500,
           color: sel ? C.primary : C.text3,
         );
       }),

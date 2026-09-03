@@ -29,6 +29,7 @@ class _HomeTabState extends State<HomeTab> {
 
   dynamic get _journey => data.journey;
   bool _hadData = false;
+  bool _flightsRequested = false;
 
   @override
   void didChangeDependencies() {
@@ -36,13 +37,29 @@ class _HomeTabState extends State<HomeTab> {
     if (!_hadData) {
       _hadData = true;
       data.load();
+      _requestFlightStatus();
     }
+  }
+
+  void _requestFlightStatus() {
+    if (_flightsRequested) return;
+    _flightsRequested = true;
+    final t = data.tickets != null && data.tickets!.isNotEmpty ? data.tickets!.first as Map<String, dynamic> : null;
+    final origin = (t?['origin'] as String?) ?? 'CAI';
+    final dest = (t?['destination'] as String?) ?? 'DXB';
+    data.loadFlights(origin, dest);
+  }
+
+  String _timeGreeting() {
+    final h = DateTime.now().hour;
+    if (h < 12) return 'Good morning,';
+    if (h < 18) return 'Good afternoon,';
+    return 'Good evening,';
   }
 
   @override
   Widget build(BuildContext context) {
     final journey = _journey;
-    final canJourney = journey != null && journey['access'] == 'personal';
     final ticket = data.tickets != null && data.tickets!.isNotEmpty ? data.tickets!.first as Map<String, dynamic> : null;
     final firstName = (auth.user?['name'] as String? ?? 'Traveler').split(' ').first;
 
@@ -62,24 +79,25 @@ class _HomeTabState extends State<HomeTab> {
           ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(C.pad, 18, C.pad, 28),
-            children: [
-              _header(firstName),
-              const SizedBox(height: 20),
-              if (ticket != null)
-                FlightHeroCard(flight: ticket, onTap: () => push(context, const BoardingPassScreen()))
-              else
-                _noTicket(),
-              const SizedBox(height: 16),
-              _pointsCard(),
-              if (canJourney && journey?['journey'] != null) ...[
+              children: [
+                _header(firstName),
+                const SizedBox(height: 22),
+                if (ticket != null)
+                  FlightHeroCard(flight: ticket, onTap: () => push(context, const BoardingPassScreen()))
+                else
+                  _noTicket(),
+                const SizedBox(height: 18),
+                SectionTitle('Quick actions'),
+                _quickGrid(quick),
+                const SizedBox(height: 8),
+                _nextStep(context, journey?['journey'] as Map<String, dynamic>?),
+                const SizedBox(height: 8),
+                SectionHeader('Flight Status', actionLabel: 'See All', onAction: () => push(context, const FlightDetailsScreen())),
+                _flightStatus(),
+                const SizedBox(height: 26),
+                _pointsCard(),
                 const SizedBox(height: 16),
-                _nextStep(context, journey!['journey'] as Map<String, dynamic>),
               ],
-              const SizedBox(height: 26),
-              const SectionTitle('Quick actions'),
-              _quickGrid(quick),
-              const SizedBox(height: 12),
-            ],
           ),
         ),
       ),
@@ -96,8 +114,8 @@ class _HomeTabState extends State<HomeTab> {
             const Text('CYCLONE', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w900, letterSpacing: 2, color: C.primaryDark)),
           ]),
           const SizedBox(height: 10),
-          const Text('Good to see you', style: TextStyle(color: C.text3, fontSize: 13)),
-          Text('Hello, $firstName', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: C.text, letterSpacing: -0.4)),
+          Text(_timeGreeting(), style: const TextStyle(color: C.text3, fontSize: 13)),
+          Text(firstName, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: C.text, letterSpacing: -0.4)),
         ]),
       ),
       const SizedBox(width: 10),
@@ -150,9 +168,27 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  Widget _nextStep(BuildContext context, Map<String, dynamic> journey) {
-    final steps = (journey['steps'] as List? ?? <dynamic>[]).cast<Map<String, dynamic>>();
-    Map<String, dynamic>? current;
+  Widget _flightStatus() {
+    final flights = data.flights;
+    if (flights == null || flights.isEmpty) {
+      return CyCard(
+        child: Row(children: [
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(color: C.primarySoft, borderRadius: BorderRadius.circular(13)),
+            child: const Icon(Icons.flight_takeoff, color: C.primary, size: 22),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(child: Text('Live flight status will appear here.', style: TextStyle(color: C.text2, fontSize: 13.5))),
+        ]),
+      );
+    }
+    return FlightStatusCard(flights: flights.cast<Map<String, dynamic>>(), onRowTap: () => push(context, const FlightDetailsScreen()));
+  }
+
+  Widget _nextStep(BuildContext context, Map<String, dynamic>? journey) {
+    if (journey == null) return const SizedBox.shrink();
+    final steps = (journey['steps'] as List? ?? <dynamic>[]).cast<Map<String, dynamic>>();    Map<String, dynamic>? current;
     for (final s in steps) {
       if ((s['status'] as String? ?? '') == 'current') { current = s; break; }
     }

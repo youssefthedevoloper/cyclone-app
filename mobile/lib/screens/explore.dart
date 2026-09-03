@@ -15,6 +15,7 @@ import 'sub/tickets.dart';
 import 'sub/boarding_pass.dart';
 import 'sub/lost_found.dart';
 import 'sub/airport_map.dart';
+import 'sub/points.dart';
 
 /// Explore: dining, shops, lounges, transportation and useful airport
 /// information — surfaced as focused destination cards.
@@ -38,7 +39,7 @@ class ExploreTab extends StatelessWidget {
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     const Text('Explore', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: C.text, letterSpacing: -0.4)),
                     const SizedBox(height: 2),
-                    Text('Discover the airport', style: const TextStyle(color: C.text3, fontSize: 13.5)),
+                    Text('Discover at the Airport', style: const TextStyle(color: C.text3, fontSize: 13.5)),
                   ]),
                 ),
                 headerChip(Icons.local_activity, '${data.points} pts'),
@@ -48,6 +49,7 @@ class ExploreTab extends StatelessWidget {
                 icon: Icons.restaurant_outlined,
                 title: 'Dining',
                 subtitle: 'Restaurants & cafés',
+                color: const Color(0xFFF4A62A),
                 onTap: () => push(context, const RestaurantsScreen()),
               ),
               const SizedBox(height: 12),
@@ -55,6 +57,7 @@ class ExploreTab extends StatelessWidget {
                 icon: Icons.shopping_bag_outlined,
                 title: 'Shops',
                 subtitle: 'Duty-free & partner stores',
+                color: const Color(0xFF8E6EF0),
                 onTap: () => push(context, const ShopsScreen()),
               ),
               const SizedBox(height: 12),
@@ -62,6 +65,7 @@ class ExploreTab extends StatelessWidget {
                 icon: Icons.weekend_outlined,
                 title: 'Lounges',
                 subtitle: 'Relax, work & refresh',
+                color: const Color(0xFF1E4DB7),
                 onTap: () => push(context, const LoungesScreen()),
               ),
               const SizedBox(height: 12),
@@ -69,6 +73,7 @@ class ExploreTab extends StatelessWidget {
                 icon: Icons.directions_bus_outlined,
                 title: 'Transportation',
                 subtitle: 'Ground transport & transfers',
+                color: const Color(0xFF0FA47F),
                 onTap: () => push(context, const TransportationScreen()),
               ),
               const SizedBox(height: 12),
@@ -76,6 +81,7 @@ class ExploreTab extends StatelessWidget {
                 icon: Icons.local_hospital_outlined,
                 title: 'Medical',
                 subtitle: 'Facilities & assistance',
+                color: const Color(0xFFE4577E),
                 onTap: () => push(context, const MedicalScreen()),
               ),
               const SizedBox(height: 12),
@@ -83,11 +89,13 @@ class ExploreTab extends StatelessWidget {
                 icon: Icons.room_service_outlined,
                 title: 'Airport Services',
                 subtitle: 'Book lounges, assistance & more',
+                color: const Color(0xFF2A9D8F),
                 onTap: () => push(context, const ServicesScreen()),
               ),
               const SizedBox(height: 26),
               const SectionHeader('Useful info', subtitle: 'Trip essentials at a glance'),
               ServiceListCard(children: [
+                ServiceRow(icon: Icons.local_activity, title: 'Cyclone Points', subtitle: 'Rewards & your balance', onTap: () => push(context, const CyclonePointsScreen())),
                 ServiceRow(icon: Icons.airplane_ticket_outlined, title: 'Tickets', subtitle: 'Manage your flights', onTap: () => push(context, const TicketsScreen())),
                 ServiceRow(icon: Icons.badge_outlined, title: 'Boarding Pass', subtitle: 'View your pass', onTap: () => push(context, const BoardingPassScreen())),
                 ServiceRow(icon: Icons.shield_outlined, title: 'Lost & Found', subtitle: 'Report & recover items', onTap: () => push(context, const LostFoundScreen())),
@@ -116,6 +124,7 @@ class ExploreTab extends StatelessWidget {
     required IconData icon,
     required String title,
     required String subtitle,
+    Color color = C.primary,
     required VoidCallback onTap,
   }) {
     return CyCard(
@@ -126,8 +135,8 @@ class ExploreTab extends StatelessWidget {
         child: Row(children: [
           Container(
             width: 54, height: 54,
-            decoration: BoxDecoration(color: C.primarySoft, borderRadius: BorderRadius.circular(16)),
-            child: Icon(icon, color: C.primary, size: 26),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(16)),
+            child: Icon(icon, color: color, size: 26),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -139,8 +148,8 @@ class ExploreTab extends StatelessWidget {
           ),
           Container(
             width: 32, height: 32,
-            decoration: const BoxDecoration(color: C.primarySoft, shape: BoxShape.circle),
-            child: const Icon(Icons.arrow_forward, size: 17, color: C.primary),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.12), shape: BoxShape.circle),
+            child: Icon(Icons.arrow_forward, size: 17, color: color),
           ),
         ]),
       ),

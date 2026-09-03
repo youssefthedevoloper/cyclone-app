@@ -10,6 +10,7 @@ class AppData extends ChangeNotifier {
   List<dynamic>? items;
   Map<String, dynamic>? notifications; // { notifications, unreadCount }
   List<dynamic>? airports;
+  List<dynamic>? flights; // for the Flight Status section
   final Set<String> loading = {};
 
   Future<void> load() async {
@@ -84,6 +85,22 @@ class AppData extends ChangeNotifier {
       airports = [];
     }
     loading.remove('airports');
+    notifyListeners();
+  }
+
+  /// Loads live flight rows for the Flight Status section on the Home tab.
+  /// Uses the existing /api/flights/search endpoint with the user's route.
+  Future<void> loadFlights(String origin, String destination, [String? date]) async {
+    loading.add('flights');
+    notifyListeners();
+    try {
+      final d = (date ?? DateTime.now().toIso8601String());
+      final r = await Api.get('/api/flights/search/$origin/$destination/$d');
+      flights = (r['flights'] as List?) ?? [];
+    } catch (_) {
+      flights = null;
+    }
+    loading.remove('flights');
     notifyListeners();
   }
 

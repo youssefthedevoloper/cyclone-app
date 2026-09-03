@@ -100,6 +100,7 @@ class _JourneyTabState extends State<JourneyTab> {
       }
     }
     if (currentStep == null && steps.isNotEmpty) currentStep = steps.first;
+    final currentIndex = steps.indexWhere((s) => identical(s, currentStep));
 
     final list = <Widget>[];
 
@@ -134,9 +135,16 @@ class _JourneyTabState extends State<JourneyTab> {
       ));
     }
 
-    // Current step spotlight
+    // Current step spotlight (reference: large blue card + Step X of Y + dots)
     if (!allDone && currentStep != null) {
-      list.add(const SectionHeader('Your next step', subtitle: 'Do this now'));
+      list.add(const SizedBox(height: 16));
+      list.add(Row(children: [
+        Expanded(
+          child: Text('Step ${currentIndex + 1} of ${steps.length}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: C.text)),
+        ),
+        JourneyProgressDots(total: steps.length, current: currentIndex),
+      ]));
+      list.add(const SizedBox(height: 12));
       list.add(_currentStepCard(context, currentStep));
     }
 
@@ -175,34 +183,38 @@ class _JourneyTabState extends State<JourneyTab> {
     final instructions = s['instructions']?.toString() ?? '';
 
     return CyCard(
-      padding: const EdgeInsets.all(18),
-      color: C.primarySoft,
-      border: Border.all(color: C.primaryLine),
+      padding: const EdgeInsets.all(20),
+      color: C.primary,
+      border: Border.all(color: C.primary),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Container(
-            width: 42, height: 42,
-            decoration: BoxDecoration(color: C.primary, borderRadius: BorderRadius.circular(13)),
-            child: const Icon(Icons.my_location, color: Colors.white, size: 22),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(999)),
+            child: const Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(Icons.my_location, color: Colors.white, size: 15),
+              SizedBox(width: 6),
+              Text('You are here', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800)),
+            ]),
           ),
-          const SizedBox(width: 12),
-          Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: C.primaryDark))),
         ]),
+        const SizedBox(height: 14),
+        Text(title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: Colors.white, letterSpacing: -0.3)),
         if (desc.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          Text(desc, style: const TextStyle(color: C.primaryDark, fontSize: 13.5, height: 1.4)),
+          const SizedBox(height: 8),
+          Text(desc, style: const TextStyle(color: Colors.white70, fontSize: 13.5, height: 1.4)),
         ],
         if (instructions.isNotEmpty) ...[
           const SizedBox(height: 8),
-          Text('“$instructions”', style: const TextStyle(color: C.primaryDark, fontSize: 12.5, fontStyle: FontStyle.italic)),
+          Text('“$instructions”', style: const TextStyle(color: Colors.white, fontSize: 12.5, fontStyle: FontStyle.italic)),
         ],
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
         Row(children: [
           Expanded(
             child: FilledButton(
               onPressed: _busy ? null : () => completeStep(id),
-              style: FilledButton.styleFrom(backgroundColor: C.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 13), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(C.radiusSmall))),
-              child: _busy ? const SizedBox(width: 17, height: 17, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('Complete step', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
+              style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: C.primary, padding: const EdgeInsets.symmetric(vertical: 13), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(C.radiusSmall))),
+              child: _busy ? const SizedBox(width: 17, height: 17, child: CircularProgressIndicator(strokeWidth: 2, color: C.primary)) : const Text('Complete step', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
             ),
           ),
           if (nav != null && nav['id'] != null) ...[
@@ -210,7 +222,7 @@ class _JourneyTabState extends State<JourneyTab> {
             Expanded(
               child: OutlinedButton(
                 onPressed: () => push(context, const AirportMapScreen()),
-                style: OutlinedButton.styleFrom(foregroundColor: C.primary, side: const BorderSide(color: C.primaryLine), padding: const EdgeInsets.symmetric(vertical: 13), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(C.radiusSmall))),
+                style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Colors.white38), padding: const EdgeInsets.symmetric(vertical: 13), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(C.radiusSmall))),
                 child: const Text('Navigate', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
               ),
             ),
